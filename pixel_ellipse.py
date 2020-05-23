@@ -2,32 +2,53 @@
 # of ellipses based on command line parameters.
 
 from math import *
-
+from convex_polygon import *
 
 class Pixel:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        v = [(x, y), (x+1., y), (x+1., y+1.), (x, y+1.)]
+        self.poly = ConvexPolygon(v)
 
-    # Add an entry point for a line segment in counter clockwise reckoning.
-    def add_cc_entry(self, x, y):
-        assert(x >= self.x)
-        assert(y >= self.y)
-        assert(x == self.x or x == self.x + 1 or y == self.y or y == self.y + 1)
-        self.cc_entry_x = x
-        self.cc_entry_y = y
+    def trim_outer(self, p0, p1):
+        assert(type(p0) == tuple)
+        assert(len(p0) >= 2)
+        assert(type(p1) == tuple)
+        assert(len(p1) >= 2)
+        tri = ConvexPolygon([(0., 0.), p0, p1])
+        # Ignore double solutions. We can only get away with
+        # this because we're using unit thickness ellipses.
+        eps = 0.00001
+        a = tri.area()
+        if abs(a) < eps:
+            return
+        elif a < 0: # Reorder if necessary.
+            temp = p1
+            p1 = p0
+            p0 = temp
+        self.poly.trim(p0, p1)
 
-    def add_cc_exit(self, x, y):
-        assert(x >= self.x)
-        assert(x >= self.y)
-        assert(x == self.x or x == self.x + 1 or y == self.y or y == self.y + 1)
-        self.cc_exit_x = x
-        self.cc_exit_y = y
+    # Inner ellipse vertex ordering is clockwise.
+    def trim_inner(self, p0, p1):
+        assert(type(p0) == tuple)
+        assert(len(p0) >= 2)
+        assert(type(p1) == tuple)
+        assert(len(p1) >= 2)
+        tri = ConvexPolygon([(0., 0.), p0, p1])
+        # Ignore double solutions. We can only get away with
+        # this because we're using unit thickness ellipses.
+        eps = 0.00001
+        a = tri.area()
+        if abs(a) < eps:
+            return
+        elif a > 0: # Reorder if necessary.
+            temp = p1
+            p1 = p0
+            p0 = temp
+        self.poly.trim(p0, p1)
 
-    def get_area(self):
-        pass
-
-class Ellipse:
+class Ellipse(object):
     def __init__(self, a, b, th):
         self.a = float(a)
         self.b = float(b)
@@ -65,4 +86,61 @@ def ellipse(x, y, th, a, b):
     Y = x * sin(th) - y * cos(th)
     return (X*X) / (a*a) + (Y*Y) / (b*b)
 
+
+def ellipse_points(e):
+    assert(type(e) == Ellipse)
+    p = set()
+    x = 0.
+    seeking = True
+    while seeking:
+        y_pair = e.solve_y(x)
+        if y_pair:
+            p.add((x, y_pair[0]))
+            p.add((x, y_pair[1]))
+        else:
+            seeking = False
+        x += 1.
+
+    seeking = True
+    x = -1.
+    while seeking:
+        y_pair = e.solve_y(x)
+        if y_pair:
+            p.add((x, y_pair[0]))
+            p.add((x, y_pair[1]))
+        else:
+            seeking = False
+        x -= 1.
+
+    seeking = True
+    y = 0.
+    while seeking:
+        x_pair = e.solve_x(y)
+        if x_pair:
+            p.add((x_pair[0], y))
+            p.add((x_pair[1], y))
+        else:
+            seeking = False
+        y += 1.
+
+    seeking = True
+    y = -1.
+    while seeking:
+        x_pair = e.solve_x(y)
+        if x_pair:
+            p.add((x_pair[0], y))
+            p.add((x_pair[1], y))
+        else:
+            seeking = False
+        y -= 1.
+
+    return p
+
+def raster_ellipse(a, b, th):
+    assert(a > 1. and b > 1.)
+    outer = Ellipse(a, b, th)
+    inner = Ellipse(a-1., b-1., th)
+    
+    outer_points = ellipse_points(outer)
+    inner_points = ellipse_points(inner)
 

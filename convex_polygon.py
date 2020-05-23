@@ -87,13 +87,15 @@ class ConvexPolygon:
         assert(len(start) >= 2)
         assert(type(end) == tuple)
         assert(len(end) >= 2)
-        h = Halfspace(start, end)
+        h = HalfSpace(start, end)
         in_v = self.vertices
         out_v = []
         for i in range(len(in_v)):
             cur_point = in_v[i]
             if i == 0:
                 prev_point = in_v[-1]
+            else:
+                prev_point = in_v[i-1]
             if h.contains(cur_point):
                 if not h.contains(prev_point):
                     out_v.append(h.intersection(prev_point, cur_point))
