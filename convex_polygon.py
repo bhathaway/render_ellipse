@@ -12,6 +12,9 @@ class Vector2d(object):
         assert(type(v) == Vector2d)
         return self.x * v.x + self.y * v.y
 
+    def __repr__(self):
+        return "<{}, {}>".format(self.x, self.y)
+
 # As always, counterclockwise.
 class HalfSpace:
     def __init__(self, start, end):
@@ -26,7 +29,7 @@ class HalfSpace:
 
     def contains(self, p):
         assert(type(p) == tuple)
-        assert(len(start) >= 2)
+        assert(len(p) >= 2)
         test = Vector2d(p[0] - self.point[0],
           p[1] - self.point[1])
         return self.normal.dot(test) >= 0
@@ -44,9 +47,9 @@ class HalfSpace:
         r = v1.dot(self.normal)
         if q-r == 0:
             return None
-        t = q / (q-r)
+        t = 1.*q / (q-r)
         v = Vector2d(end[0] - start[0], end[1] - start[1])
-        return (start[0] + t*v.x, start[1] + t.v.y)
+        return (start[0] + t*v.x, start[1] + t*v.y)
 
 # I got the area equation from here:
 # https://www.mathwords.com/a/area_convex_polygon.htm
