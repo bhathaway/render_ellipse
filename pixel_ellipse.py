@@ -290,16 +290,14 @@ def render_raster(raster):
             if (x, y) in pixels:
                 p = pixels[(x, y)]
                 a = p.poly.area()
-                if a < 0.125:
+                if a < 0.25:
                     s += ' '
-                elif a < 0.375:
+                elif a < 0.5:
                     s += '.'
-                elif a < 0.625:
+                elif a < 0.75:
                     s += 'o'
-                elif a < 0.875:
-                    s += 'O'
                 else:
-                    s += 'G'
+                    s += 'O'
             else:
                 s += ' '
             x+=1.0
