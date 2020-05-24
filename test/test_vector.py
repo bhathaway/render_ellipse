@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from convex_polygon import *
 
 v = Vector2d(1, 2)

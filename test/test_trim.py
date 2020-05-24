@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from pixel_ellipse import *
 
 p = Pixel(0., 0.)

@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from convex_polygon import *
 from math import *
 

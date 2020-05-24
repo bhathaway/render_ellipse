@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from pixel_ellipse import *
 
 outer_a = 20

@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from convex_polygon import *
 
 h = HalfSpace((0, 0), (1, 0))
