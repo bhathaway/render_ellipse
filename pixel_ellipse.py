@@ -142,6 +142,7 @@ def raster_ellipse(a, b, th):
     max_x = None
     min_y = None
     max_y = None
+    eps = 0.00001
     outer = Ellipse(a, b, th)
     inner = Ellipse(a-1., b-1., th)
     
@@ -152,9 +153,18 @@ def raster_ellipse(a, b, th):
     # Now create a sparse array of pixels from the lists.
     # For now I'm going to re-solve. I know it's inefficient, so
     # that will be something to optimize.
-    pixels = {}
+    candidates = set()
     for point in both:
-        (x, y) = (floor(point[0]), floor(point[1]))
+        (x, y) = point
+        candidates.add((floor(x), floor(y)))
+        if floor(x) == x:
+            # Include both sides
+            candidates.add((floor(x)-1, floor(y)))
+        if floor(y) == y:
+            candidates.add((floor(x), floor(y)-1))
+
+    pixels = {}
+    for (x, y) in candidates:
         if not min_x:
             min_x = x
             max_x = x
@@ -171,45 +181,51 @@ def raster_ellipse(a, b, th):
 
         if not (x, y) in pixels:
             p = Pixel(x, y)
+            trimmed = False
             points = []
             # Lower edge
             x_pair = outer.solve_x(y)
             if x_pair:
                 (x0, x1) = x_pair
-                if x0 >= x and x0 <= x+1:
-                    points.append((x0, y))
-                if x1 >= x and x1 <= x+1:
-                    points.append((x1, y))
+                if abs(x0 - x1) > eps:
+                    if x0 >= x and x0 <= x+1:
+                        points.append((x0, y))
+                    if x1 >= x and x1 <= x+1:
+                        points.append((x1, y))
             # Right edge
             y_pair = outer.solve_y(x+1.)
             if y_pair:
                 (y0, y1) = y_pair
-                if y0 >= y and y0 <= y+1:
-                    points.append((x+1., y0))
-                if y1 >= y and y1 <= y+1:
-                    points.append((x+1., y1))
+                if abs(y0 - y1) > eps:
+                    if y0 >= y and y0 <= y+1:
+                        points.append((x+1., y0))
+                    if y1 >= y and y1 <= y+1:
+                        points.append((x+1., y1))
             # Upper edge
             x_pair = outer.solve_x(y+1.)
             if x_pair:
                 (x0, x1) = x_pair
-                if x0 >= x and x0 <= x+1:
-                    points.append((x0, y+1.))
-                if x1 >= x and x1 <= x+1:
-                    points.append((x1, y+1.))
+                if abs(x0 - x1) > eps:
+                    if x0 >= x and x0 <= x+1:
+                        points.append((x0, y+1.))
+                    if x1 >= x and x1 <= x+1:
+                        points.append((x1, y+1.))
             # Left edge
             y_pair = outer.solve_y(x)
             if y_pair:
                 (y0, y1) = y_pair
-                if y0 >= y and y0 <= y+1:
-                    points.append((x, y0))
-                if y1 >= y and y1 <= y+1:
-                    points.append((x, y1))
+                if abs(y0 - y1) > eps:
+                    if y0 >= y and y0 <= y+1:
+                        points.append((x, y0))
+                    if y1 >= y and y1 <= y+1:
+                        points.append((x, y1))
 
             if (len(points) >= 2):
                 # To be honest, it's a huge pain to account for
                 # situtations other than a pair, and it will not 
                 # likely make a huge difference.
                 p.trim_outer(points[0], points[1])
+                trimmed = True
 
             # Repeat for inner vertices.
             points = []
@@ -217,42 +233,48 @@ def raster_ellipse(a, b, th):
             x_pair = inner.solve_x(y)
             if x_pair:
                 (x0, x1) = x_pair
-                if x0 >= x and x0 <= x+1:
-                    points.append((x0, y))
-                if x1 >= x and x1 <= x+1:
-                    points.append((x1, y))
+                if abs(x0 - x1) > eps:
+                    if x0 >= x and x0 <= x+1:
+                        points.append((x0, y))
+                    if x1 >= x and x1 <= x+1:
+                        points.append((x1, y))
             # Right edge
             y_pair = inner.solve_y(x+1.)
             if y_pair:
                 (y0, y1) = y_pair
-                if y0 >= y and y0 <= y+1:
-                    points.append((x+1., y0))
-                if y1 >= y and y1 <= y+1:
-                    points.append((x+1., y1))
+                if abs(y0 - y1) > eps:
+                    if y0 >= y and y0 <= y+1:
+                        points.append((x+1., y0))
+                    if y1 >= y and y1 <= y+1:
+                        points.append((x+1., y1))
             # Upper edge
             x_pair = inner.solve_x(y+1.)
             if x_pair:
                 (x0, x1) = x_pair
-                if x0 >= x and x0 <= x+1:
-                    points.append((x0, y+1.))
-                if x1 >= x and x1 <= x+1:
-                    points.append((x1, y+1.))
+                if abs(x0 - x1) > eps:
+                    if x0 >= x and x0 <= x+1:
+                        points.append((x0, y+1.))
+                    if x1 >= x and x1 <= x+1:
+                        points.append((x1, y+1.))
             # Left edge
             y_pair = inner.solve_y(x)
             if y_pair:
                 (y0, y1) = y_pair
-                if y0 >= y and y0 <= y+1:
-                    points.append((x, y0))
-                if y1 >= y and y1 <= y+1:
-                    points.append((x, y1))
+                if abs(y0 - y1) > eps:
+                    if y0 >= y and y0 <= y+1:
+                        points.append((x, y0))
+                    if y1 >= y and y1 <= y+1:
+                        points.append((x, y1))
 
             if (len(points) >= 2):
                 # To be honest, it's a huge pain to account for
                 # situtations other than a pair, and it will not 
                 # likely make a huge difference.
                 p.trim_inner(points[0], points[1])
+                trimmed = True
 
-            pixels[(x, y)] = p
+            if trimmed:
+                pixels[(x, y)] = p
         # endif
     #end for
     return [[(min_x, min_y), (max_x, max_y)], pixels]
@@ -268,14 +290,16 @@ def render_raster(raster):
             if (x, y) in pixels:
                 p = pixels[(x, y)]
                 a = p.poly.area()
-                if a < 0.25:
+                if a < 0.125:
                     s += ' '
-                elif a < 0.625:
+                elif a < 0.375:
                     s += '.'
-                elif a < 0.875:
+                elif a < 0.625:
                     s += 'o'
-                else:
+                elif a < 0.875:
                     s += 'O'
+                else:
+                    s += 'G'
             else:
                 s += ' '
             x+=1.0
