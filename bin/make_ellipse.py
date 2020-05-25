@@ -13,13 +13,18 @@ parser.add_argument('-Y', '--vertical_radius', type=float, required=True,
     help='distance from center to vertical edge')
 parser.add_argument('-A', '--angle', type=float, default=0.0,
     help='Angle to rotate clockwise in degrees')
+parser.add_argument('-x', '--nudgex', type=float, default=0.0,
+    help='x translation applied after rotation')
+parser.add_argument('-y', '--nudgey', type=float, default=0.0,
+    help='y translation applied after rotation')
 parser.add_argument('--test', action='store_true')
 
 args = parser.parse_args()
 angle = args.angle * math.pi / 180.0
 
 if (not args.test):
-    r = raster_ellipse(args.horizontal_radius, args.vertical_radius, angle)
+    r = raster_ellipse(args.horizontal_radius, args.vertical_radius,
+        angle, (args.nudgex, args.nudgey))
     print(render_raster(r))
 else:
     inner_a = args.horizontal_radius - 1.

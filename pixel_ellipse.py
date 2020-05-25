@@ -49,10 +49,11 @@ class Pixel:
         self.poly.trim(p0, p1)
 
 class Ellipse(object):
-    def __init__(self, a, b, th):
+    def __init__(self, a, b, th, nudge=(0., 0.)):
         self.a = float(a)
         self.b = float(b)
         self.th = float(th)
+        self.nudge = nudge
         c = cos(th)
         s = sin(th)
         self.A = (c*c)/(a*a) + (s*s)/(b*b)
@@ -63,10 +64,13 @@ class Ellipse(object):
         A = self.A
         B = self.B
         C = self.C
-        det = -4*A*C*x*x + B*B*x*x + 4*C
+        x0 = self.nudge[0]
+        y0 = self.nudge[1]
+        u = x - x0
+        det = -4*A*C*u*u + B*B*u*u + 4*C
         if det >= 0:
             r = sqrt(det)
-            return ((r-B*x)/(2*C), (-r-B*x)/(2*C))
+            return ((r-B*u)/(2*C)+y0, (-r-B*u)/(2*C)+y0)
         else:
             return None
 
@@ -74,10 +78,13 @@ class Ellipse(object):
         A = self.A
         B = self.B
         C = self.C
-        det = -4*A*C*y*y + B*B*y*y + 4*A
+        x0 = self.nudge[0]
+        y0 = self.nudge[1]
+        v = y - y0
+        det = -4*A*C*v*v + B*B*v*v + 4*A
         if det >= 0:
             r = sqrt(det)
-            return ((r-B*y)/(2*A), (-r-B*y)/(2*A))
+            return ((r-B*v)/(2*A)+x0, (-r-B*v)/(2*A)+x0)
         else:
             return None
 
@@ -136,15 +143,15 @@ def ellipse_points(e):
 
     return p
 
-def raster_ellipse(a, b, th):
+def raster_ellipse(a, b, th, nudge):
     assert(a > 1. and b > 1.)
     min_x = None
     max_x = None
     min_y = None
     max_y = None
     eps = 0.00001
-    outer = Ellipse(a, b, th)
-    inner = Ellipse(a-1., b-1., th)
+    outer = Ellipse(a, b, th, nudge)
+    inner = Ellipse(a-1., b-1., th, nudge)
     
     outer_points = ellipse_points(outer)
     inner_points = ellipse_points(inner)
