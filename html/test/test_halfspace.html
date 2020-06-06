@@ -1,0 +1,22 @@
+<html>
+<head>
+</head>
+    <meta charset="UTF-8">
+    <title>Javascipt Test Page</title>
+<body>
+<script type='module'>
+import {HalfSpace} from '../convex_polygon.js'
+
+var h = new HalfSpace([0, 0], [1, 0]);
+console.assert(h.contains([0, 0]), "[0, 0] is outside h");
+console.assert(h.contains([0, 1]), "[0, 1] is outside h");
+console.assert(!h.contains([0, -1]), "[0, -1] is inside h");
+
+var x = h.intersection([0, -1], [1, 1]);
+var i = [0.5, 0.0];
+console.assert(x[0] == i[0] && x[1] == i[1], "Wrong intersection");
+
+alert("Passed!");
+</script>
+</body>
+</html>

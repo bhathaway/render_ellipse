@@ -1,0 +1,46 @@
+<html>
+<head>
+</head>
+    <meta charset="UTF-8">
+    <title>Javascipt Test Page</title>
+<body>
+<script type='module'>
+import {ConvexPolygon} from '../convex_polygon.js';
+
+var l = [[-4, 3], [2, 5], [5, 1]];
+
+var c = new ConvexPolygon(l);
+console.assert(c.area() == -15, "Area of c not -15");
+
+l = [[-4, 3], [5, 1], [2, 5]];
+c = new ConvexPolygon(l);
+console.assert(c.edge_count() == 3, "c edge count not 3");
+
+var p = c.get_vertex(0);
+var e_p = [-4, 3];
+console.assert(p[0] == e_p[0] && p[1] == e_p[1], "Vertex 0 wrong.");
+
+p = c.get_vertex(1);
+e_p = [5, 1];
+console.assert(p[0] == e_p[0] && p[1] == e_p[1], "Vertex 1 wrong.");
+
+p = c.get_vertex(2);
+e_p = [2, 5];
+console.assert(p[0] == e_p[0] && p[1] == e_p[1], "Vertex 2 wrong.");
+
+console.assert(c.area() == 15, "Area of c not 15");
+
+// Let's test a "Pixel"
+l = [[0, 0], [1, 0], [1, 1], [0, 1]];
+var  s = new ConvexPolygon(l);
+console.assert(s.area() == 1.0, "Area of s not 1.0");
+
+// How about a hexagon?
+var  s_3 = Math.sqrt(3.0);
+l = [[0, 0], [1, 0], [1.5, s_3/2.0], [1, s_3], [0, s_3], [-0.5, s_3/2.0]];
+var h = new ConvexPolygon(l);
+console.assert(Math.abs(h.area() - 1.5*s_3) < 0.000001, "h has wrong area");
+alert("Passed!");
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<html>
+<head>
+</head>
+    <meta charset="UTF-8">
+    <title>Javascipt Test Page</title>
+<body>
+<script type='module'>
+import {Vector2d} from '../convex_polygon.js'
+
+var v = new Vector2d(1, 2);
+var n1 = v.normal();
+console.assert(n1.x == -2, "n1.x != -2");
+console.assert(n1.y == 1, "n1.y != 1");
+
+console.assert(v.dot(n1) == 0, "v . n1 != 0");
+
+alert("Passed!")
+</script>
+</body>
+</html>
