@@ -11,7 +11,7 @@ class Pixel:
         v = [(x, y), (x+1., y), (x+1., y+1.), (x, y+1.)]
         self.poly = ConvexPolygon(v)
 
-    def trim_outer(self, p0, p1):
+    def trim_outer(self, p0, p1, reverse=False):
         assert(type(p0) == tuple)
         assert(len(p0) >= 2)
         assert(type(p1) == tuple)
@@ -21,32 +21,26 @@ class Pixel:
         # this because we're using unit thickness ellipses.
         eps = 0.00001
         a = tri.area()
+
+        swap = False
         if abs(a) < eps:
             return
-        elif a < 0: # Reorder if necessary.
+        elif reverse:
+            if a > 0:
+                swap = True
+        else:
+            if a < 0:
+                swap = True
+
+        if swap:
             temp = p1
             p1 = p0
             p0 = temp
+
         self.poly.trim(p0, p1)
 
-    # Inner ellipse vertex ordering is clockwise.
     def trim_inner(self, p0, p1):
-        assert(type(p0) == tuple)
-        assert(len(p0) >= 2)
-        assert(type(p1) == tuple)
-        assert(len(p1) >= 2)
-        tri = ConvexPolygon([(0., 0.), p0, p1])
-        # Ignore double solutions. We can only get away with
-        # this because we're using unit thickness ellipses.
-        eps = 0.00001
-        a = tri.area()
-        if abs(a) < eps:
-            return
-        elif a > 0: # Reorder if necessary.
-            temp = p1
-            p1 = p0
-            p0 = temp
-        self.poly.trim(p0, p1)
+        self.trim_outer(p0, p1, True)
 
 class Ellipse(object):
     def __init__(self, a, b, th, nudge=(0., 0.)):
