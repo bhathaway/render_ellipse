@@ -1,0 +1,24 @@
+<html>
+<head>
+</head>
+    <meta charset="UTF-8">
+    <title>Javascipt Test Page</title>
+<body>
+<script type='module'>
+import {Pixel} from '../pixel_ellipse.js'
+
+var p = new Pixel(0., 0.);
+p.trim_outer([1.0, 0.5], [0.5, 1.0]);
+p.trim_inner([0.0, 0.5], [0.5, 0.0]);
+console.assert(p.poly.area() == 0.75, "p has wrong area");
+
+// Try reversing the vertices.
+var q = new Pixel(0., 0.);
+q.trim_outer([0.5, 1.0], [1.0, 0.5]);
+q.trim_inner([0.5, 0.0], [0.0, 0.5]);
+console.assert(q.poly.area() == 0.75, "q has wrong area");
+
+alert("Passed!");
+</script>
+</body>
+</html>

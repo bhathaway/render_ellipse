@@ -1,0 +1,71 @@
+<html>
+<head>
+</head>
+    <meta charset="UTF-8">
+    <title>Javascipt Test Page</title>
+<body>
+<script type='module'>
+import {Ellipse} from '../pixel_ellipse.js'
+
+var outer_a = 20;
+var outer_b = 14;
+var theta = 0.64;
+var inner_a = 16;
+var inner_b = 10;
+
+var min_x = -20;
+var max_x = 20;
+var min_y = -20;
+var max_y = 20;
+
+var inner_ellipse = new Ellipse(inner_a, inner_b, theta);
+var outer_ellipse = new Ellipse(outer_a, outer_b, theta);
+
+var inner_set = new Set();
+for (let x = min_x; x < max_x + 1; ++x) {
+    let y_pair = inner_ellipse.solve_y(x);
+    if (y_pair) {
+        inner_set.add([x, y_pair[0]]);
+        inner_set.add([x, y_pair[1]]);
+    }
+}
+
+for (let y = min_y; y < max_y + 1; ++y) {
+    let x_pair = inner_ellipse.solve_x(y);
+    if (x_pair) {
+        inner_set.add([x_pair[0], y]);
+        inner_set.add([x_pair[1], y]);
+    }
+}
+
+var outer_set = new Set();
+for (let x = min_x; x < max_x + 1; ++x) {
+    let y_pair = outer_ellipse.solve_y(x);
+    if (y_pair) {
+        outer_set.add([x, y_pair[0]]);
+        outer_set.add([x, y_pair[1]]);
+    }
+}
+
+for (let y = min_y; y < max_y + 1; ++y) {
+    let x_pair = outer_ellipse.solve_x(y);
+    if (x_pair) {
+        outer_set.add([x_pair[0], y]);
+        outer_set.add([x_pair[1], y]);
+    }
+}
+
+console.log("Inner coordinates:");
+for (let i of inner_set) {
+    console.log(i[0].toString() + "\t" + i[1].toString());
+}
+
+console.log("\nOuter coordinates:");
+for (let i of outer_set) {
+    console.log(i[0].toString() + "\t" + i[1].toString());
+}
+
+alert("Passed!");
+</script>
+</body>
+</html>
