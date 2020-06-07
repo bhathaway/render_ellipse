@@ -1,0 +1,16 @@
+<html>
+<head>
+</head>
+    <meta charset="UTF-8">
+    <title>Javascipt Test Page</title>
+<body>
+<script type='module'>
+import {raster_ellipse, render_raster} from '../pixel_ellipse.js'
+
+var p = raster_ellipse(20, 14, 0.64, [0.0, 0.5]);
+var s = render_raster(p);
+
+console.log(s);
+</script>
+</body>
+</html>

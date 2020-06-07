@@ -182,7 +182,7 @@ function raster_ellipse(a, b, th, nudge)
     
     let outer_points = ellipse_points(outer);
     let inner_points = ellipse_points(inner);
-    both = inner_points.concat(outer_points);
+    let both = inner_points.concat(outer_points);
 
     // Now create a sparse array of pixels from the lists.
     // For now I'm going to re-solve. I know it's inefficient, so
@@ -192,7 +192,7 @@ function raster_ellipse(a, b, th, nudge)
         let x = point[0];
         let y = point[1];
         candidates.add([Math.floor(x), Math.floor(y)]);
-        if Math.floor(x) == x {
+        if (Math.floor(x) == x) {
             // Include both sides
             candidates.add([Math.floor(x)-1, Math.floor(y)]);
         }
@@ -205,7 +205,7 @@ function raster_ellipse(a, b, th, nudge)
     for (let c of candidates) {
         let x = c[0];
         let y = c[1];
-        if !min_x {
+        if (!min_x) {
             min_x = x;
             max_x = x;
             min_y = y;
@@ -286,7 +286,7 @@ function raster_ellipse(a, b, th, nudge)
                 }
             }
 
-            if (points.length >= 2) {
+            if (points.size >= 2) {
                 // To be honest, it's a huge pain to account for
                 // situtations other than a pair, and it will not 
                 // likely make a huge difference.
@@ -329,7 +329,7 @@ function raster_ellipse(a, b, th, nudge)
             x_pair = inner.solve_x(y+1.);
             if (x_pair) {
                 let x0 = x_pair[0];
-                let x1 = x_Pair[1];
+                let x1 = x_pair[1];
                 if (Math.abs(x0 - x1) > eps) {
                     if (x0 >= x && x0 <= x+1) {
                         points.add([x0, y+1.]);
@@ -354,11 +354,11 @@ function raster_ellipse(a, b, th, nudge)
                 }
             }
 
-            if (points.length >= 2) {
+            if (points.size >= 2) {
                 // To be honest, it's a huge pain to account for
                 // situtations other than a pair, and it will not 
                 // likely make a huge difference.
-                l = Array.from(points);
+                let l = Array.from(points);
                 p.trim_inner(l[0], l[1]);
                 trimmed = true;
             }
