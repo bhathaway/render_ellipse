@@ -82,12 +82,6 @@ class Ellipse(object):
         else:
             return None
 
-def ellipse(x, y, th, a, b):
-    X = x * cos(th) + y * sin(th)
-    Y = x * sin(th) - y * cos(th)
-    return (X*X) / (a*a) + (Y*Y) / (b*b)
-
-
 def ellipse_points(e):
     assert(type(e) == Ellipse)
     p = []

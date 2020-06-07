@@ -128,7 +128,7 @@ class ConvexPolygon {
         console.assert((typeof end == 'object') && (Array.isArray(end)),
           'end must be an array');
         console.assert(end.length >= 2, 'Not enough coordinates in end');
-        let h = HalfSpace(start, end);
+        let h = new HalfSpace(start, end);
         let in_v = this.vertices;
         let out_v = [];
         for (let i = 0; i < in_v.length; ++i) {
