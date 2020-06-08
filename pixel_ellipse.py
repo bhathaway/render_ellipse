@@ -131,6 +131,49 @@ def ellipse_points(e):
 
     return p
 
+def points_in_pixel(el, x, y):
+    assert(type(el) == Ellipse)
+    eps = 0.00001
+    result = set()
+
+    # Lower edge
+    x_pair = el.solve_x(y)
+    if x_pair:
+        (x0, x1) = x_pair
+        if abs(x0 - x1) > eps:
+            if x0 >= x and x0 <= x+1:
+                result.add((x0, y))
+            if x1 >= x and x1 <= x+1:
+                result.add((x1, y))
+    # Right edge
+    y_pair = el.solve_y(x+1.)
+    if y_pair:
+        (y0, y1) = y_pair
+        if abs(y0 - y1) > eps:
+            if y0 >= y and y0 <= y+1:
+                result.add((x+1., y0))
+            if y1 >= y and y1 <= y+1:
+                result.add((x+1., y1))
+    # Upper edge
+    x_pair = el.solve_x(y+1.)
+    if x_pair:
+        (x0, x1) = x_pair
+        if abs(x0 - x1) > eps:
+            if x0 >= x and x0 <= x+1:
+                result.add((x0, y+1.))
+            if x1 >= x and x1 <= x+1:
+                result.add((x1, y+1.))
+    # Left edge
+    y_pair = el.solve_y(x)
+    if y_pair:
+        (y0, y1) = y_pair
+        if abs(y0 - y1) > eps:
+            if y0 >= y and y0 <= y+1:
+                result.add((x, y0))
+            if y1 >= y and y1 <= y+1:
+                result.add((x, y1))
+    return result
+
 def raster_ellipse(a, b, th, nudge):
     assert(a > 1. and b > 1.)
     min_x = None
@@ -174,107 +217,33 @@ def raster_ellipse(a, b, th, nudge):
         if y < min_y:
             min_y = y
 
-        if not (x, y) in pixels:
-            p = Pixel(x, y)
-            trimmed = False
-            # No double points.
-            points = set()
-            # Lower edge
-            x_pair = outer.solve_x(y)
-            if x_pair:
-                (x0, x1) = x_pair
-                if abs(x0 - x1) > eps:
-                    if x0 >= x and x0 <= x+1:
-                        points.add((x0, y))
-                    if x1 >= x and x1 <= x+1:
-                        points.add((x1, y))
-            # Right edge
-            y_pair = outer.solve_y(x+1.)
-            if y_pair:
-                (y0, y1) = y_pair
-                if abs(y0 - y1) > eps:
-                    if y0 >= y and y0 <= y+1:
-                        points.add((x+1., y0))
-                    if y1 >= y and y1 <= y+1:
-                        points.add((x+1., y1))
-            # Upper edge
-            x_pair = outer.solve_x(y+1.)
-            if x_pair:
-                (x0, x1) = x_pair
-                if abs(x0 - x1) > eps:
-                    if x0 >= x and x0 <= x+1:
-                        points.add((x0, y+1.))
-                    if x1 >= x and x1 <= x+1:
-                        points.add((x1, y+1.))
-            # Left edge
-            y_pair = outer.solve_y(x)
-            if y_pair:
-                (y0, y1) = y_pair
-                if abs(y0 - y1) > eps:
-                    if y0 >= y and y0 <= y+1:
-                        points.add((x, y0))
-                    if y1 >= y and y1 <= y+1:
-                        points.add((x, y1))
+        if (x, y) in pixels:
+            continue
 
-            if (len(points) >= 2):
-                # To be honest, it's a huge pain to account for
-                # situtations other than a pair, and it will not 
-                # likely make a huge difference.
-                l = list(points)
-                p.trim_outer(l[0], l[1])
-                trimmed = True
+        p = Pixel(x, y)
+        trimmed = False
+        # No double points.
+        points = points_in_pixel(outer, x, y)
 
-            # Repeat for inner vertices.
-            points.clear()
-            # Lower edge
-            x_pair = inner.solve_x(y)
-            if x_pair:
-                (x0, x1) = x_pair
-                if abs(x0 - x1) > eps:
-                    if x0 >= x and x0 <= x+1:
-                        points.add((x0, y))
-                    if x1 >= x and x1 <= x+1:
-                        points.add((x1, y))
-            # Right edge
-            y_pair = inner.solve_y(x+1.)
-            if y_pair:
-                (y0, y1) = y_pair
-                if abs(y0 - y1) > eps:
-                    if y0 >= y and y0 <= y+1:
-                        points.add((x+1., y0))
-                    if y1 >= y and y1 <= y+1:
-                        points.add((x+1., y1))
-            # Upper edge
-            x_pair = inner.solve_x(y+1.)
-            if x_pair:
-                (x0, x1) = x_pair
-                if abs(x0 - x1) > eps:
-                    if x0 >= x and x0 <= x+1:
-                        points.add((x0, y+1.))
-                    if x1 >= x and x1 <= x+1:
-                        points.add((x1, y+1.))
-            # Left edge
-            y_pair = inner.solve_y(x)
-            if y_pair:
-                (y0, y1) = y_pair
-                if abs(y0 - y1) > eps:
-                    if y0 >= y and y0 <= y+1:
-                        points.add((x, y0))
-                    if y1 >= y and y1 <= y+1:
-                        points.add((x, y1))
+        if (len(points) >= 2):
+            # To be honest, it's a huge pain to account for
+            # situtations other than a pair, and it will not 
+            # likely make a huge difference.
+            l = list(points)
+            p.trim_outer(l[0], l[1])
+            trimmed = True
 
-            if (len(points) >= 2):
-                # To be honest, it's a huge pain to account for
-                # situtations other than a pair, and it will not 
-                # likely make a huge difference.
-                l = list(points)
-                p.trim_inner(l[0], l[1])
-                trimmed = True
+        # Repeat for inner vertices.
 
-            if trimmed:
-                pixels[(x, y)] = p
-        # endif
-    #end for
+        points = points_in_pixel(inner, x, y)
+        if (len(points) >= 2):
+            l = list(points)
+            p.trim_inner(l[0], l[1])
+            trimmed = True
+
+        if trimmed:
+            pixels[(x, y)] = p
+
     return [[(min_x, min_y), (max_x, max_y)], pixels]
 
 def render_raster(raster):
