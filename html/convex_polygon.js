@@ -1,3 +1,5 @@
+// The JavaScript herein should exactly replicate the function
+// of convex_polygon.py
 
 class Vector2d {
     constructor(x, y)

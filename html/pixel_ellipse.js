@@ -1,5 +1,5 @@
-// I want this python script to be able to generate ascii art
-// of ellipses based on command line parameters.
+// This JavaScript should exactly replicate the function of
+// pixel_ellipse.py
 
 import {ConvexPolygon} from './convex_polygon.js'
 
