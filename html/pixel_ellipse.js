@@ -169,6 +169,73 @@ function ellipse_points(e)
     return p;
 }
 
+function points_in_pixel(el, x, y)
+{
+    console.assert((typeof el == 'object') && (el instanceof Ellipse),
+      'Wrong type for el');
+    let eps = 0.00001;
+    let result = new Set();
+
+    // Lower edge
+    let x_pair = el.solve_x(y);
+    if (x_pair) {
+        let x0 = x_pair[0];
+        let x1 = x_pair[1];
+        if (Math.abs(x0 - x1) > eps) {
+            if (x0 >= x && x0 <= x+1) {
+                result.add([x0, y]);
+            }
+            if (x1 >= x && x1 <= x+1) {
+                result.add([x1, y]);
+            }
+        }
+    }
+    // Right edge
+    let y_pair = el.solve_y(x+1.);
+    if (y_pair) {
+        let y0 = y_pair[0];
+        let y1 = y_pair[1];
+        if (Math.abs(y0 - y1) > eps) {
+            if (y0 >= y && y0 <= y+1) {
+                result.add([x+1., y0]);
+            }
+            if (y1 >= y && y1 <= y+1) {
+                result.add([x+1., y1]);
+            }
+        }
+    }
+    // Upper edge
+    x_pair = el.solve_x(y+1.);
+    if (x_pair) {
+        let x0 = x_pair[0];
+        let x1 = x_pair[1];
+        if (Math.abs(x0 - x1) > eps) {
+            if (x0 >= x && x0 <= x+1) {
+                result.add([x0, y+1.]);
+            }
+            if (x1 >= x && x1 <= x+1) {
+                result.add([x1, y+1.]);
+            }
+        }
+    }
+    // Left edge
+    y_pair = el.solve_y(x);
+    if (y_pair) {
+        let y0 = y_pair[0];
+        let y1 = y_pair[1];
+        if (Math.abs(y0 - y1) > eps) {
+            if (y0 >= y && y0 <= y+1) {
+                result.add([x, y0]);
+            }
+            if (y1 >= y && y1 <= y+1) {
+                result.add([x, y1]);
+            }
+        }
+    }
+
+    return result;
+}
+
 function raster_ellipse(a, b, th, nudge)
 {
     console.assert(a > 1. && b > 1., "a and b should be greater than 1");
@@ -223,149 +290,36 @@ function raster_ellipse(a, b, th, nudge)
         if (y < min_y) {
             min_y = y;
         }
+        
+        if ([x, y] in pixels) {
+            continue;
+        }
 
-        if (! ([x, y] in pixels)) {
-            let p = new Pixel(x, y);
-            let trimmed = false;
-            // No double points.
-            let points = new Set();
-            // Lower edge
-            let x_pair = outer.solve_x(y);
-            if (x_pair) {
-                let x0 = x_pair[0];
-                let x1 = x_pair[1];
-                if (Math.abs(x0 - x1) > eps) {
-                    if (x0 >= x && x0 <= x+1) {
-                        points.add([x0, y]);
-                    }
-                    if (x1 >= x && x1 <= x+1) {
-                        points.add([x1, y]);
-                    }
-                }
-            }
-            // Right edge
-            let y_pair = outer.solve_y(x+1.);
-            if (y_pair) {
-                let y0 = y_pair[0];
-                let y1 = y_pair[1];
-                if (Math.abs(y0 - y1) > eps) {
-                    if (y0 >= y && y0 <= y+1) {
-                        points.add([x+1., y0]);
-                    }
-                    if (y1 >= y && y1 <= y+1) {
-                        points.add([x+1., y1]);
-                    }
-                }
-            }
-            // Upper edge
-            x_pair = outer.solve_x(y+1.);
-            if (x_pair) {
-                let x0 = x_pair[0];
-                let x1 = x_pair[1];
-                if (Math.abs(x0 - x1) > eps) {
-                    if (x0 >= x && x0 <= x+1) {
-                        points.add([x0, y+1.]);
-                    }
-                    if (x1 >= x && x1 <= x+1) {
-                        points.add([x1, y+1.]);
-                    }
-                }
-            }
-            // Left edge
-            y_pair = outer.solve_y(x);
-            if (y_pair) {
-                let y0 = y_pair[0];
-                let y1 = y_pair[1];
-                if (Math.abs(y0 - y1) > eps) {
-                    if (y0 >= y && y0 <= y+1) {
-                        points.add([x, y0]);
-                    }
-                    if (y1 >= y && y1 <= y+1) {
-                        points.add([x, y1]);
-                    }
-                }
-            }
+        let p = new Pixel(x, y);
+        let trimmed = false;
+        // No double points.
+        let points = points_in_pixel(outer, x, y);
 
-            if (points.size >= 2) {
-                // To be honest, it's a huge pain to account for
-                // situtations other than a pair, and it will not 
-                // likely make a huge difference.
-                let l = Array.from(points);
-                p.trim_outer(l[0], l[1]);
-                trimmed = true;
-            }
+        if (points.size >= 2) {
+            // To be honest, it's a huge pain to account for
+            // situtations other than a pair, and it will not 
+            // likely make a huge difference.
+            let l = Array.from(points);
+            p.trim_outer(l[0], l[1]);
+            trimmed = true;
+        }
 
-            // Repeat for inner vertices.
-            points.clear();
-            // Lower edge
-            x_pair = inner.solve_x(y);
-            if (x_pair) {
-                let x0 = x_pair[0];
-                let x1 = x_pair[1];
-                if (Math.abs(x0 - x1) > eps) {
-                    if (x0 >= x && x0 <= x+1) {
-                        points.add([x0, y]);
-                    }
-                    if (x1 >= x && x1 <= x+1) {
-                        points.add([x1, y]);
-                    }
-                }
-            }
-            // Right edge
-            y_pair = inner.solve_y(x+1.);
-            if (y_pair) {
-                let y0 = y_pair[0];
-                let y1 = y_pair[1];
-                if (Math.abs(y0 - y1) > eps) {
-                    if (y0 >= y && y0 <= y+1) {
-                        points.add([x+1., y0]);
-                    }
-                    if (y1 >= y && y1 <= y+1) {
-                        points.add([x+1., y1]);
-                    }
-                }
-            }
-            // Upper edge
-            x_pair = inner.solve_x(y+1.);
-            if (x_pair) {
-                let x0 = x_pair[0];
-                let x1 = x_pair[1];
-                if (Math.abs(x0 - x1) > eps) {
-                    if (x0 >= x && x0 <= x+1) {
-                        points.add([x0, y+1.]);
-                    }
-                    if (x1 >= x && x1 <= x+1) {
-                        points.add([x1, y+1.]);
-                    }
-                }
-            }
-            // Left edge
-            y_pair = inner.solve_y(x);
-            if (y_pair) {
-                let y0 = y_pair[0];
-                let y1 = y_pair[1];
-                if (Math.abs(y0 - y1) > eps) {
-                    if (y0 >= y && y0 <= y+1) {
-                        points.add([x, y0]);
-                    }
-                    if (y1 >= y && y1 <= y+1) {
-                        points.add([x, y1]);
-                    }
-                }
-            }
+        // Repeat for inner vertices.
+        points = points_in_pixel(inner, x, y);
 
-            if (points.size >= 2) {
-                // To be honest, it's a huge pain to account for
-                // situtations other than a pair, and it will not 
-                // likely make a huge difference.
-                let l = Array.from(points);
-                p.trim_inner(l[0], l[1]);
-                trimmed = true;
-            }
+        if (points.size >= 2) {
+            let l = Array.from(points);
+            p.trim_inner(l[0], l[1]);
+            trimmed = true;
+        }
 
-            if (trimmed) {
-                pixels[[x, y]] = p;
-            }
+        if (trimmed) {
+            pixels[[x, y]] = p;
         }
     }
 
