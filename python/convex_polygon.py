@@ -62,6 +62,13 @@ class ConvexPolygon:
         assert(all(map(lambda x: type(x) == tuple, vertices)))
         assert(all(map(lambda x: len(x) >= 2, vertices)))
         self.vertices = vertices
+        self.half_spaces = []
+        for i in range(len(self.vertices)):
+            next_i = i + 1
+            if next_i == len(self.vertices):
+                next_i = 0
+            self.half_spaces.append(\
+              HalfSpace(self.vertices[i], self.vertices[next_i]))
 
     def edge_count(self):
         return len(self.vertices)
@@ -103,4 +110,10 @@ class ConvexPolygon:
             elif h.contains(prev_point):
                 out_v.append(h.intersection(prev_point, cur_point))
         self.vertices = out_v
+    
+    def contains(self, p):
+        for h in self.half_spaces:
+            if not h.contains(p):
+                return False
+        return True
 
