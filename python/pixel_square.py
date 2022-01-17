@@ -44,7 +44,14 @@ def raster_square(a, th, nudge):
             if in_square(square, float(x), float(y)):
                 result += 'Q'
             else:
-                result += ' '
+                if y % 5 == 0 and x % 5 == 0:
+                    result += '+'
+                elif x % 5 == 0:
+                    result += '|'
+                elif y % 5 == 0:
+                    result += '-'
+                else:
+                    result += '.'
         result += '\n'
     return result
 
