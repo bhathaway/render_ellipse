@@ -23,7 +23,7 @@ def in_square(square, low_x, low_y):
 # 'nudge' is a vector that offsets the square
 # for a potentially better rendering.
 def raster_square(a, th, nudge):
-    assert(a > 1)
+    assert(a > 0)
     assert(abs(nudge[0]) < 1. and abs(nudge[1]) < 1.)
     diag = ceil(a * sqrt(2.)/2.)
     min_x = -diag - 1
