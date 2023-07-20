@@ -1,13 +1,14 @@
-import sys
-sys.path.append('..')
-from convex_polygon import *
+from ascii_shapes.convex_polygon import Vector2d
+import unittest
 
-v = Vector2d(1, 2)
-n1 = v.normal()
-assert(n1.x == -2)
-assert(n1.y == 1)
+class TestVector2d(unittest.TestCase):
+    def test_basics(self):
+        v = Vector2d(1, 2)
+        n1 = v.normal()
+        self.assertEqual(n1.x, -2)
+        self.assertEqual(n1.y, 1)
+        self.assertEqual(v.dot(n1), 0)
 
-assert(v.dot(n1) == 0)
-
-print("Passed!")
+if __name__ == '__main__':
+    unittest.main()
 

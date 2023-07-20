@@ -1,9 +1,5 @@
-#! /usr/bin/env python
-
-import sys
-sys.path.append('..')
 import math
-from pixel_ellipse import *
+from ascii_shapes.pixel_ellipse import *
 
 import argparse as ap
 parser = ap.ArgumentParser(description='Make ASCII art ellipse')

@@ -1,9 +1,5 @@
-#! /usr/bin/env python
-
-import sys
-sys.path.append('..')
 import math
-from pixel_square import *
+from ascii_shapes.pixel_square import *
 
 import argparse as ap
 parser = ap.ArgumentParser(description='Make ASCII art square')

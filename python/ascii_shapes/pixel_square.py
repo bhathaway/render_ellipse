@@ -2,7 +2,7 @@
 # by a certain angle.
 
 from math import *
-from convex_polygon import *
+from .convex_polygon import *
 
 def in_square(square, low_x, low_y):
     samples = 5
