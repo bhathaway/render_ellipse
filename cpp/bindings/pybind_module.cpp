@@ -10,12 +10,14 @@ namespace py = pybind11;
 PYBIND11_MODULE(ascii_shapes, m) {
   m.doc() = "ascii_shapes python plugin";
 
-  py::class_<Vector2d>(m, "Vector2d")
+  auto m_convex_polygon = m.def_submodule("convex_polygon");
+
+  py::class_<Vector2d>(m_convex_polygon, "Vector2d")
     .def(py::init<double, double>())
     .def("normal", &Vector2d::normal)
     .def("dot", &Vector2d::dot)
     .def("scaled_by", &Vector2d::scaled_by)
-    .def("x", &Vector2d::x)
-    .def("y", &Vector2d::y)
+    .def_property("x", &Vector2d::x, nullptr)
+    .def_property("y", &Vector2d::y, nullptr)
     .def("__repr__", &Vector2d::to_string);
 }
