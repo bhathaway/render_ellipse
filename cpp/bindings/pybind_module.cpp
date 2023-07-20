@@ -1,8 +1,9 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <sstream>
 
 #include "src/convex_polygon.h"
-
+#include "src/pixel_ellipse.h"
 
 namespace py = pybind11;
 
@@ -36,4 +37,21 @@ PYBIND11_MODULE(ascii_shapes, m) {
     .def("contains", &HalfSpace::contains)
     .def("intersection", &HalfSpace::intersection)
     .def("__repr__", &HalfSpace::to_string);
+
+  py::class_<ConvexPolygon>(m_convex_polygon, "ConvexPolygon")
+    .def(py::init<const std::vector<Point2d>&>())
+    .def("edge_count", &ConvexPolygon::edge_count)
+    .def("get_vertex", &ConvexPolygon::get_vertex)
+    .def("area", &ConvexPolygon::area)
+    .def("trim", &ConvexPolygon::trim)
+    .def("contains", &ConvexPolygon::contains);
+
+  auto m_pixel_ellipse = m.def_submodule("pixel_ellipse");
+
+  py::class_<Pixel>(m_pixel_ellipse, "Pixel")
+    .def(py::init<double, double>())
+    .def("trim_outer", &Pixel::trim_outer,
+         py::arg("p0"), py::arg("p1"), py::arg("reversed") = false)
+    .def("trim_inner", &Pixel::trim_inner)
+    .def_property("poly", &Pixel::poly, nullptr);
 }

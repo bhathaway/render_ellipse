@@ -82,3 +82,70 @@ std::string HalfSpace::to_string() const
   return ss.str();
 }
 
+ConvexPolygon::ConvexPolygon(const std::vector<Point2d>& vertices)
+: vertices_(vertices)
+{
+  assert(vertices.size() > 2);
+  for (std::size_t i = 0; i < vertices.size(); ++i) {
+    std::size_t next_i = i + 1;
+    if (next_i == vertices.size())
+      next_i = 0;
+    halfspaces_.emplace_back(vertices[i], vertices[next_i]);
+  }
+}
+
+std::size_t ConvexPolygon::edge_count() const
+{
+  return vertices_.size();
+}
+
+const Point2d& ConvexPolygon::get_vertex(std::size_t i) const
+{
+  return vertices_[i];
+}
+
+double ConvexPolygon::area() const
+{
+  double positive_diagonal_sum = 0;
+  double negative_diagonal_sum = 0;
+  for (std::size_t i = 0; i < vertices_.size(); ++i) {
+    std::size_t k = i + 1;
+    if (k == vertices_.size())
+      k = 0;
+    positive_diagonal_sum += vertices_[i].x() * vertices_[k].y();
+    negative_diagonal_sum += vertices_[i].y() * vertices_[k].x();
+  }
+
+  return (positive_diagonal_sum - negative_diagonal_sum) / 2.0;
+}
+
+void ConvexPolygon::trim(const Point2d& start, const Point2d& end)
+{
+  const HalfSpace h(start, end);
+  std::vector<Point2d> new_vertices;
+  for (std::size_t i = 0; i < vertices_.size(); ++i) {
+    const Point2d& current_point = vertices_[i];
+    const Point2d& previous_point =
+      i == 0 ? vertices_[vertices_.size() - 1] : vertices_[i - 1];
+
+    if (h.contains(current_point)) {
+      if (!h.contains(previous_point))
+        new_vertices.push_back(h.intersection(previous_point, current_point));
+      new_vertices.push_back(current_point);
+    } else if (h.contains(previous_point)) {
+      new_vertices.push_back(h.intersection(previous_point, current_point));
+    }
+  }
+
+  vertices_ = new_vertices;
+}
+
+bool ConvexPolygon::contains(const Point2d& p) const
+{
+  for (const HalfSpace& h : halfspaces_)
+    if (!h.contains(p))
+      return false;
+
+  return true;
+}
+
