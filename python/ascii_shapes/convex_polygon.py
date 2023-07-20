@@ -12,44 +12,64 @@ class Vector2d(object):
         assert(type(v) == Vector2d)
         return self.x * v.x + self.y * v.y
 
+    def scaled_by(self, s):
+        return Vector2d(s * self.x, s * self.y)
+
+    def __eq__(self, v):
+        return self.x == v.x and self.y == v.y
+
     def __repr__(self):
-        return "<{}, {}>".format(self.x, self.y)
+        return "v<{}, {}>".format(self.x, self.y)
+
+class Point2d(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def minus(self, p):
+        assert(type(p) == Point2d)
+        return Vector2d(self.x - p.x, self.y - p.y)
+
+    def plus(self, v):
+        assert(type(v) == Vector2d)
+        return Point2d(self.x + v.x, self.y + v.y)
+
+    def __eq__(self, p):
+        return self.x == p.x and self.y == p.y
+
+    # Needed for set operations
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __repr__(self):
+        return "p({}, {})".format(self.x, self.y)
 
 # As always, counterclockwise.
 class HalfSpace:
     def __init__(self, start, end):
-        assert(type(start) == tuple)
-        assert(len(start) >= 2)
-        assert(type(end) == tuple)
-        assert(len(end) >= 2)
+        assert(type(start) == Point2d)
+        assert(type(end) == Point2d)
         self.point = start
-        v = Vector2d(end[0] - start[0], end[1] - start[1])
-        self.alt_point = end
+        v = end.minus(start)
         self.normal = v.normal()
 
     def contains(self, p):
-        assert(type(p) == tuple)
-        assert(len(p) >= 2)
-        test = Vector2d(p[0] - self.point[0],
-          p[1] - self.point[1])
+        assert(type(p) == Point2d)
+        test = p.minus(self.point)
         return self.normal.dot(test) >= 0
 
     def intersection(self, start, end):
-        assert(type(start) == tuple)
-        assert(len(start) >= 2)
-        assert(type(end) == tuple)
-        assert(len(end) >= 2)
-        v0 = Vector2d(start[0] - self.point[0],
-          start[1] - self.point[1])
-        v1 = Vector2d(end[0] - self.point[0],
-          end[1] - self.point[1])
+        assert(type(start) == Point2d)
+        assert(type(end) == Point2d)
+        v0 = start.minus(self.point)
+        v1 = end.minus(self.point)
         q = v0.dot(self.normal)
         r = v1.dot(self.normal)
         if q-r == 0:
             return None
         t = 1.*q / (q-r)
-        v = Vector2d(end[0] - start[0], end[1] - start[1])
-        return (start[0] + t*v.x, start[1] + t*v.y)
+        v = end.minus(start)
+        return start.plus(v.scaled_by(t))
 
 # I got the area equation from here:
 # https://www.mathwords.com/a/area_convex_polygon.htm
@@ -59,8 +79,7 @@ class HalfSpace:
 class ConvexPolygon:
     def __init__(self, vertices):
         assert(type(vertices) == list)
-        assert(all(map(lambda x: type(x) == tuple, vertices)))
-        assert(all(map(lambda x: len(x) >= 2, vertices)))
+        assert(all(map(lambda x: type(x) == Point2d, vertices)))
         self.vertices = vertices
         self.half_spaces = []
         for i in range(len(self.vertices)):
@@ -85,15 +104,11 @@ class ConvexPolygon:
             k = i + 1
             if k >= m:
                 k = 0
-            pos_diag_sum += v[i][0] * v[k][1]
-            neg_diag_sum += v[i][1] * v[k][0]
+            pos_diag_sum += v[i].x * v[k].y
+            neg_diag_sum += v[i].y * v[k].x
         return (pos_diag_sum - neg_diag_sum) / 2.0
 
     def trim(self, start, end):
-        assert(type(start) == tuple)
-        assert(len(start) >= 2)
-        assert(type(end) == tuple)
-        assert(len(end) >= 2)
         h = HalfSpace(start, end)
         in_v = self.vertices
         out_v = []

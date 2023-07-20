@@ -17,6 +17,11 @@ Vector2d Vector2d::scaled_by(double s) const
   return Vector2d(s * x_, s * y_);
 }
 
+bool Vector2d::operator==(const Vector2d& v) const
+{
+  return x_ == v.x_ && y_ == v.y_;
+}
+
 std::string Vector2d::to_string() const
 {
   std::stringstream ss;
@@ -34,12 +39,22 @@ Point2d Point2d::plus(const Vector2d& v) const
   return Point2d(x_ + v.x(), y_ + v.y());
 }
 
+bool Point2d::operator==(const Point2d& p) const
+{
+  return x_ == p.x_ && y_ == p.y_;
+}
+
 std::string Point2d::to_string() const
 {
   std::stringstream ss;
   ss << "p(" << x_ << ", " << y_ << ')';
   return ss.str();
 }
+
+HalfSpace::HalfSpace(const Point2d& p0, const Point2d& p1)
+: point_(p0),
+  normal_(p1.minus(p0).normal())
+{ }
 
 bool HalfSpace::contains(const Point2d& p) const
 {

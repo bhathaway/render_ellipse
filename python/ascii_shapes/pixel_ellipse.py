@@ -1,19 +1,18 @@
 from math import *
 from .convex_polygon import *
+P = Point2d
 
 class Pixel:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        v = [(x, y), (x+1., y), (x+1., y+1.), (x, y+1.)]
+        v = [P(x, y), P(x+1., y), P(x+1., y+1.), P(x, y+1.)]
         self.poly = ConvexPolygon(v)
 
     def trim_outer(self, p0, p1, reverse=False):
-        assert(type(p0) == tuple)
-        assert(len(p0) >= 2)
-        assert(type(p1) == tuple)
-        assert(len(p1) >= 2)
-        tri = ConvexPolygon([(0., 0.), p0, p1])
+        assert(type(p0) == Point2d)
+        assert(type(p1) == Point2d)
+        tri = ConvexPolygon([P(0.0, 0.0), p0, p1])
         # Ignore double solutions. We can only get away with
         # this because we're using unit thickness ellipses.
         eps = 0.00001
@@ -139,36 +138,36 @@ def points_in_pixel(el, x, y):
         (x0, x1) = x_pair
         if abs(x0 - x1) > eps:
             if x0 >= x and x0 <= x+1:
-                result.add((x0, y))
+                result.add(P(x0, y))
             if x1 >= x and x1 <= x+1:
-                result.add((x1, y))
+                result.add(P(x1, y))
     # Right edge
     y_pair = el.solve_y(x+1.)
     if y_pair:
         (y0, y1) = y_pair
         if abs(y0 - y1) > eps:
             if y0 >= y and y0 <= y+1:
-                result.add((x+1., y0))
+                result.add(P(x+1., y0))
             if y1 >= y and y1 <= y+1:
-                result.add((x+1., y1))
+                result.add(P(x+1., y1))
     # Upper edge
     x_pair = el.solve_x(y+1.)
     if x_pair:
         (x0, x1) = x_pair
         if abs(x0 - x1) > eps:
             if x0 >= x and x0 <= x+1:
-                result.add((x0, y+1.))
+                result.add(P(x0, y+1.))
             if x1 >= x and x1 <= x+1:
-                result.add((x1, y+1.))
+                result.add(P(x1, y+1.))
     # Left edge
     y_pair = el.solve_y(x)
     if y_pair:
         (y0, y1) = y_pair
         if abs(y0 - y1) > eps:
             if y0 >= y and y0 <= y+1:
-                result.add((x, y0))
+                result.add(P(x, y0))
             if y1 >= y and y1 <= y+1:
-                result.add((x, y1))
+                result.add(P(x, y1))
     return result
 
 def raster_ellipse(a, b, th, nudge):
