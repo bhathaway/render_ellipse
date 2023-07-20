@@ -22,6 +22,7 @@ PYBIND11_MODULE(ascii_shapes, m) {
     .def("scaled_by", &Vector2d::scaled_by)
     .def_property("x", &Vector2d::x, nullptr)
     .def_property("y", &Vector2d::y, nullptr)
+    .def("__eq__", &Vector2d::operator==)
     .def("__repr__", &Vector2d::to_string);
 
   py::implicitly_convertible<py::tuple, Vector2d>();
@@ -35,6 +36,7 @@ PYBIND11_MODULE(ascii_shapes, m) {
     .def("plus", &Point2d::plus)
     .def_property("x", &Point2d::x, nullptr)
     .def_property("y", &Point2d::y, nullptr)
+    .def("__eq__", &Point2d::operator==)
     .def("__repr__", &Point2d::to_string);
 
   py::implicitly_convertible<py::tuple, Point2d>();

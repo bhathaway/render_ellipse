@@ -15,6 +15,8 @@ public:
   double x() const { return x_; }
   double y() const { return y_; }
 
+  bool operator==(const Vector2d& v) const;
+
   std::string to_string() const;
 
 private:
@@ -33,6 +35,8 @@ public:
 
   double x() const { return x_; }
   double y() const { return y_; }
+
+  bool operator==(const Point2d& p) const;
 
   std::string to_string() const;
 
