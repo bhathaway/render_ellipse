@@ -41,6 +41,11 @@ std::string Point2d::to_string() const
   return ss.str();
 }
 
+HalfSpace::HalfSpace(const Point2d& p0, const Point2d& p1)
+: point_(p0),
+  normal_(p1.minus(p0).normal())
+{ }
+
 bool HalfSpace::contains(const Point2d& p) const
 {
   const Vector2d test_v = p.minus(point_);
