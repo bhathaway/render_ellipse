@@ -2,7 +2,8 @@
 # by a certain angle.
 
 from math import *
-from convex_polygon import *
+from .convex_polygon import *
+P = Point2d
 
 def in_square(square, low_x, low_y):
     samples = 5
@@ -14,7 +15,7 @@ def in_square(square, low_x, low_y):
         y = low_y + dx_2 + k * dx
         for i in range(samples):
             x = low_x + dx_2 + i * dx
-            if square.contains((x, y)):
+            if square.contains(P(x, y)):
                 in_count += 1
     return 2 * in_count > samples * samples
 
@@ -33,10 +34,10 @@ def raster_square(a, th, nudge):
 
     x_factor = (a*sqrt(2.)/2.) * cos(th)
     y_factor = (a*sqrt(2.)/2.) * sin(th)
-    coordinates = [(x_factor + nudge[0], y_factor + nudge[1]),\
-                   (-y_factor + nudge[0], x_factor + nudge[1]),\
-                   (-x_factor + nudge[0], -y_factor + nudge[1]),\
-                   (y_factor + nudge[0], -x_factor + nudge[1])]
+    coordinates = [P(x_factor + nudge[0], y_factor + nudge[1]),\
+                   P(-y_factor + nudge[0], x_factor + nudge[1]),\
+                   P(-x_factor + nudge[0], -y_factor + nudge[1]),\
+                   P(y_factor + nudge[0], -x_factor + nudge[1])]
     square = ConvexPolygon(coordinates)
     result = ""
     for y in range(max_y - 1, min_y - 1, -1):
