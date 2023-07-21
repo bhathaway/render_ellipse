@@ -54,4 +54,14 @@ PYBIND11_MODULE(ascii_shapes, m) {
          py::arg("p0"), py::arg("p1"), py::arg("reversed") = false)
     .def("trim_inner", &Pixel::trim_inner)
     .def_property("poly", &Pixel::poly, nullptr);
+
+  py::class_<Ellipse>(m_pixel_ellipse, "Ellipse")
+    .def(py::init<double, double, double, const Vector2d&>())
+    .def("y_determinant", &Ellipse::y_determinant)
+    .def("solve_y", &Ellipse::solve_y)
+    .def("x_determinant", &Ellipse::x_determinant)
+    .def("solve_x", &Ellipse::solve_x)
+    .def("points_on_grid", &Ellipse::points_on_grid)
+    .def("points_in_pixel", &Ellipse::points_in_pixel);
 }
+

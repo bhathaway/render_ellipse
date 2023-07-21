@@ -44,6 +44,18 @@ bool Point2d::operator==(const Point2d& p) const
   return x_ == p.x_ && y_ == p.y_;
 }
 
+bool Point2d::operator<(const Point2d& p) const
+{
+  if (y_ < p.y_)
+    return true;
+  else if (y_ > p.y_)
+    return false;
+  else if (x_ < p.x_)
+    return true;
+  else
+    return false;
+}
+
 std::string Point2d::to_string() const
 {
   std::stringstream ss;

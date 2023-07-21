@@ -1,4 +1,5 @@
 from ascii_shapes.pixel_ellipse import *
+from ascii_shapes.convex_polygon import Vector2d as V
 import unittest
 
 class TestRaster(unittest.TestCase):
@@ -40,7 +41,7 @@ class TestRaster(unittest.TestCase):
             '         .oOOOOoo.                    \n'
         )
 
-        p = raster_ellipse(20, 14, 0.64, (0.0, 0.5))
+        p = raster_ellipse(20, 14, 0.64, V(0.0, 0.5))
 
         s = render_raster(p)
         self.assertEqual(s, expected_output)

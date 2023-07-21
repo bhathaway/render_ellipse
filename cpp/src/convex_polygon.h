@@ -44,6 +44,7 @@ public:
   double y() const { return y_; }
 
   bool operator==(const Point2d& p) const;
+  bool operator<(const Point2d& p) const;
 
   std::string to_string() const;
 
