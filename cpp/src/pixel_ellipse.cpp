@@ -1,5 +1,7 @@
 #include "pixel_ellipse.h"
 #include <cmath>
+#include <cassert>
+#include <limits>
 
 Pixel::Pixel(double x, double y)
 : corner_(x, y)
