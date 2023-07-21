@@ -233,7 +233,6 @@ RasterResult raster_ellipse(double a, double b, double th, const Vector2d& nudge
   result.y_min = std::numeric_limits<double>::infinity();
   result.x_max = -std::numeric_limits<double>::infinity();
   result.y_max = -std::numeric_limits<double>::infinity();
-  double eps = 0.00001;
   Ellipse outer(a, b, th, nudge);
   Ellipse inner(a - 1.0, b - 1.0, th, nudge);
 

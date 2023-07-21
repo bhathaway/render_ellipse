@@ -196,7 +196,6 @@ def raster_ellipse(a, b, th, nudge):
     max_x = None
     min_y = None
     max_y = None
-    eps = 0.00001
     outer = Ellipse(a, b, th, nudge)
     inner = Ellipse(a-1., b-1., th, nudge)
     
