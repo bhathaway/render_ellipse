@@ -181,7 +181,7 @@ std::set<Point2d> Ellipse::points_in_pixel(const Pixel& p) const
   // Right edge
   det = y_determinant(x + 1);
   if (det >= 0) {
-    auto pair = solve_y(x, det);
+    auto pair = solve_y(x + 1, det);
     const double y0 = pair.first;
     const double y1 = pair.second;
     if (std::abs(y0 - y1) > eps) {
@@ -195,7 +195,7 @@ std::set<Point2d> Ellipse::points_in_pixel(const Pixel& p) const
   // Upper edge
   det = x_determinant(y + 1);
   if (det >= 0) {
-    auto pair = solve_x(y, det);
+    auto pair = solve_x(y + 1, det);
     const double x0 = pair.first;
     const double x1 = pair.second;
     if (std::abs(x0 - x1) > eps) {

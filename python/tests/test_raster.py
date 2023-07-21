@@ -21,7 +21,37 @@ class TestRaster(unittest.TestCase):
         )
 
         p = raster_ellipse(5, 5, 0.0, V(0.0, 0.0))
+        s = ascii_render(p)
+        self.assertEqual(s, expected_output)
 
+    def test_basic_ellipses(self):
+        self.maxDiff = None
+        expected_output = str(
+            '            \n'
+            '    .OO.    \n'
+            '   oo  oo   \n'
+            '  .O    O.  \n'
+            '  O.    .O  \n'
+            '  O      O  \n'
+            ' .o      o. \n'
+            ' o.      .o \n'
+            ' O        O \n'
+            ' O        O \n'
+            ' O        O \n'
+            ' O        O \n'
+            ' O        O \n'
+            ' O        O \n'
+            ' o.      .o \n'
+            ' .o      o. \n'
+            '  O      O  \n'
+            '  O.    .O  \n'
+            '  .O    O.  \n'
+            '   oo  oo   \n'
+            '    .OO.    \n'
+            '            \n'
+        )
+
+        p = raster_ellipse(5, 10, 0.0, V(0.0, 0.0))
         s = ascii_render(p)
         self.assertEqual(s, expected_output)
 
@@ -64,7 +94,6 @@ class TestRaster(unittest.TestCase):
         )
 
         p = raster_ellipse(20, 14, 0.64, V(0.0, 0.5))
-
         s = ascii_render(p)
         self.assertEqual(s, expected_output)
 
