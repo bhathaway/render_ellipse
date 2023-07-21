@@ -12,8 +12,8 @@ The reason I've titled this **ASCII art ellipse renderer** is because I've of co
 created has broader use than just Minecraft. I rather like some of the text output I've seen.
 
 ## Target Technologies
-The main technologies I've chosen to use are _python_ and _JavaScript_. The former is excellent for command line
-usage and testing, whereas the latter is basically the only option for client-side execution. I would like to
+The main technologies I've chosen to use are _python_ , _c++_ and _JavaScript_. _python_ is excellent for command line
+usage and testing, whereas the _JavaScript_ is basically the only option for client-side execution. I would like to
 eventually create a full webapp for this tool to give back to the community.
 
 ## Theory
@@ -30,7 +30,5 @@ As I mentioned, there are some corner cases. I think I've covered them fairly we
 set up, but further use may reveal unseen issues.
 
 ## Future Work
-* I think it may be worth doing some test cases by hand and creating a little unit test setup focused on final correctness
-beyond the tests I've already created.
 * Why not add the simpler method and compare performance?
 * Instead of resolving the intercepts in the algorithm, cache them.
