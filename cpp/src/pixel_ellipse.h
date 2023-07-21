@@ -1,6 +1,7 @@
 #pragma once
 #include "convex_polygon.h"
 #include <set>
+#include <map>
 
 // The concept here is that this pixel is part of a larger traced shape of
 // some thickness where the interior of that shape is conventionally at (0, 0)
@@ -11,18 +12,22 @@ class Pixel {
 public:
   Pixel(double x, double y);
 
-  void trim_outer(Point2d& p0, Point2d& p1, bool reversed = false);
-  void trim_inner(Point2d& p0, Point2d& p1);
+  Pixel(const Pixel&) = default;
+  Pixel& operator=(const Pixel&) = default;
+
+  void trim_outer(const Point2d& p0, const Point2d& p1, bool reversed = false);
+  void trim_inner(const Point2d& p0, const Point2d& p1);
 
   // Use to get vertices or area
   const ConvexPolygon& poly() const;
 
-  const double x() const { return x_; }
-  const double y() const { return y_; }
+  const double x() const { return corner_.x(); }
+  const double y() const { return corner_.y(); }
+
+  bool operator<(const Pixel& p) const { return corner_ < p.corner_; }
 
 private:
-  double x_;
-  double y_;
+  Point2d corner_;
   ConvexPolygon poly_;
 };
 
@@ -57,3 +62,20 @@ private:
   double memo_c_;
   Vector2d nudge_; // Moved from origin to facilitate aliases.
 };
+
+struct RasterResult {
+  double x_min;
+  double y_min;
+  double x_max;
+  double y_max;
+  std::map<Point2d, Pixel> points_to_pixels;
+};
+
+// The arguments here are for the outer edge of the ellipse.
+// The inner ellipse is implicity 1 pixel thick.
+RasterResult raster_ellipse(double a, double b, double th, const Vector2d& nudge);
+
+// Returns an ascii art representation of the rasterization.
+// In the future it should be possible to create other kinds of images.
+std::string ascii_render(const RasterResult&);
+

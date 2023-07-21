@@ -51,7 +51,6 @@ class Ellipse(object):
         self.B = 2*c*s*(1.0/(a*a) - 1.0/(b*b))
         self.C = (s*s)/(a*a) + (c*c)/(b*b)
 
-    # Returns a pair of y intercepts for an x value.
     def y_determinant(self, x):
         A = self.A
         B = self.B
@@ -61,6 +60,7 @@ class Ellipse(object):
 
     # Get y determinant above. If non-negative, you may use it
     # here to solve:
+    # Returns a pair of y intercepts for an x value.
     def solve_y(self, x, det):
         assert(det >= 0)
         r = sqrt(det)
@@ -70,7 +70,6 @@ class Ellipse(object):
         y0 = self.nudge.y
         return ((r-B*u)/(2*C)+y0, (-r-B*u)/(2*C)+y0)
 
-    # Returns a pair of x intercepts for a y value.
     def x_determinant(self, y):
         A = self.A
         B = self.B
@@ -80,6 +79,7 @@ class Ellipse(object):
 
     # Get x determinant above. If non-negative, you may use it
     # here to solve.
+    # Returns a pair of x intercepts for a y value.
     def solve_x(self, y, det):
         assert(det >= 0)
         r = sqrt(det)
@@ -261,7 +261,7 @@ def raster_ellipse(a, b, th, nudge):
 
     return [[(min_x, min_y), (max_x, max_y)], pixels]
 
-def render_raster(raster):
+def ascii_render(raster):
     [(min_x, min_y), (max_x, max_y)] = raster[0]
     pixels = raster[1]
     s = ''

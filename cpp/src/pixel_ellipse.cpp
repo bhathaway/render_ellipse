@@ -2,7 +2,7 @@
 #include <cmath>
 
 Pixel::Pixel(double x, double y)
-: x_(x), y_(y)
+: corner_(x, y)
 {
   std::vector<Point2d> points;
   points.emplace_back(x, y);
@@ -12,7 +12,7 @@ Pixel::Pixel(double x, double y)
   poly_ = ConvexPolygon(points);
 }
 
-void Pixel::trim_outer(Point2d& p0, Point2d& p1, bool reversed)
+void Pixel::trim_outer(const Point2d& p0, const Point2d& p1, bool reversed)
 {
   std::vector<Point2d> points;
   points.emplace_back(0, 0);
@@ -34,12 +34,12 @@ void Pixel::trim_outer(Point2d& p0, Point2d& p1, bool reversed)
   }
 
   if (swap)
-    std::swap(p0, p1);
-
-  poly_.trim(p0, p1);
+    poly_.trim(p1, p0);
+  else
+    poly_.trim(p0, p1);
 }
 
-void Pixel::trim_inner(Point2d& p0, Point2d& p1)
+void Pixel::trim_inner(const Point2d& p0, const Point2d& p1)
 {
   constexpr bool reversed = true;
   trim_outer(p0, p1, reversed);
@@ -162,6 +162,8 @@ std::set<Point2d> Ellipse::points_in_pixel(const Pixel& p) const
 
   std::set<Point2d> points;
 
+  // TODO: There's probably a way with lambda to factor
+  // these nicely.
   // Lower edge
   double det = x_determinant(y);
   if (det >= 0) {
@@ -219,4 +221,105 @@ std::set<Point2d> Ellipse::points_in_pixel(const Pixel& p) const
   }
 
   return points;
+}
+
+RasterResult raster_ellipse(double a, double b, double th, const Vector2d& nudge)
+{
+  assert(a > 1.0 && b > 1.0);
+  assert(std::numeric_limits<double>::has_infinity);
+
+  RasterResult result;
+  result.x_min = std::numeric_limits<double>::infinity();
+  result.y_min = std::numeric_limits<double>::infinity();
+  result.x_max = -std::numeric_limits<double>::infinity();
+  result.y_max = -std::numeric_limits<double>::infinity();
+  double eps = 0.00001;
+  Ellipse outer(a, b, th, nudge);
+  Ellipse inner(a - 1.0, b - 1.0, th, nudge);
+
+  std::vector<Point2d> all_points = outer.points_on_grid();
+  std::vector<Point2d> inner_points = inner.points_on_grid();
+  all_points.insert(all_points.end(), inner_points.begin(), inner_points.end());
+  
+  std::set<Point2d> candidates;
+  for (const Point2d& point: all_points) {
+    const double x = point.x();
+    const double y = point.y();
+    candidates.insert(Point2d(floor(x), floor(y)));
+    if (floor(x) == x)
+      // Include both sides
+      candidates.insert(Point2d(floor(x) - 1, floor(y)));
+    if (floor(y) == y)
+      candidates.insert(Point2d(floor(x), floor(y) - 1));
+  }
+
+  for (const Point2d& point: candidates) {
+    const double x = point.x();
+    const double y = point.y();
+    if (x > result.x_max)
+      result.x_max = x;
+    if (x < result.x_min)
+      result.x_min = x;
+    if (y > result.y_max)
+      result.y_max = y;
+    if (y < result.y_min)
+      result.y_min = y;
+
+    if (result.points_to_pixels.find(point) != result.points_to_pixels.end())
+      continue;
+
+    Pixel pixel(x, y);
+    bool trimmed = false;
+
+    std::set<Point2d> working_points = outer.points_in_pixel(pixel);
+    if (working_points.size() >= 2) {
+      // TODO: This note is copied from the python version. The issue I see
+      // here is that there's no way to guess at which points are best to use
+      // if greater than 2.
+      // It's too difficult to account for the edge cases other than point pairs,
+      // and will not likely make much difference.
+      pixel.trim_outer(*working_points.begin(), *working_points.rbegin());
+      trimmed = true;
+    }
+
+    working_points = inner.points_in_pixel(pixel);
+    if (working_points.size() >= 2) {
+      pixel.trim_inner(*working_points.begin(), *working_points.rbegin());
+      trimmed = true;
+    }
+
+    if (trimmed)
+      result.points_to_pixels.emplace(point, pixel);
+  }
+
+  return result;
+}
+
+std::string ascii_render(const RasterResult& raster)
+{
+  std::string result;
+
+  for (double y = raster.y_max; y >= raster.y_min; y -= 1) {
+    for (double x = raster.x_min; x <= raster.x_max; x += 1) {
+      Point2d point(x, y);
+      const auto pixel_ptr = raster.points_to_pixels.find(point);
+      if (pixel_ptr != raster.points_to_pixels.end()) {
+        const Pixel& pixel = pixel_ptr->second;
+        double area = pixel.poly().area();
+        if (area < 0.25)
+          result += ' ';
+        else if (area < 0.5)
+          result += '.';
+        else if (area < 0.75)
+          result += 'o';
+        else
+          result += 'O';
+      } else {
+        result += ' ';
+      }
+    }
+    result += '\n';
+  }
+
+  return result;
 }

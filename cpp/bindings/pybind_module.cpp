@@ -63,5 +63,17 @@ PYBIND11_MODULE(ascii_shapes, m) {
     .def("solve_x", &Ellipse::solve_x)
     .def("points_on_grid", &Ellipse::points_on_grid)
     .def("points_in_pixel", &Ellipse::points_in_pixel);
+
+  // This struct is deliberately missing init, because it should only
+  // be created by calling `raster_ellipse`
+  py::class_<RasterResult>(m_pixel_ellipse, "RasterResult")
+    .def_readonly("x_min", &RasterResult::x_min)
+    .def_readonly("y_min", &RasterResult::y_min)
+    .def_readonly("x_max", &RasterResult::x_max)
+    .def_readonly("y_max", &RasterResult::y_max)
+    .def_readonly("points_to_pixels", &RasterResult::points_to_pixels);
+
+  m_pixel_ellipse.def("raster_ellipse", &raster_ellipse);
+  m_pixel_ellipse.def("ascii_render", &ascii_render);
 }
 

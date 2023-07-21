@@ -22,7 +22,7 @@ angle = args.angle * math.pi / 180.0
 if (not args.test):
     r = raster_ellipse(args.horizontal_radius, args.vertical_radius,
         angle, Vector2d(args.nudgex, args.nudgey))
-    print(render_raster(r))
+    print(ascii_render(r))
 else:
     inner_a = args.horizontal_radius - 1.
     inner_b = args.vertical_radius - 1.
