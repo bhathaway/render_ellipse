@@ -1,5 +1,6 @@
 import math
 from ascii_shapes.pixel_ellipse import *
+from ascii_shapes.convex_polygon import Vector2d
 
 import argparse as ap
 parser = ap.ArgumentParser(description='Make ASCII art ellipse')
@@ -20,8 +21,8 @@ angle = args.angle * math.pi / 180.0
 
 if (not args.test):
     r = raster_ellipse(args.horizontal_radius, args.vertical_radius,
-        angle, (args.nudgex, args.nudgey))
-    print(render_raster(r))
+        angle, Vector2d(args.nudgex, args.nudgey))
+    print(ascii_render(r))
 else:
     inner_a = args.horizontal_radius - 1.
     inner_b = args.vertical_radius - 1.

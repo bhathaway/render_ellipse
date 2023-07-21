@@ -1,4 +1,5 @@
 from ascii_shapes.pixel_ellipse import Ellipse
+from ascii_shapes.convex_polygon import Vector2d
 import unittest
 
 class TestEllipseSolver(unittest.TestCase):
@@ -268,32 +269,37 @@ class TestEllipseSolver(unittest.TestCase):
         min_y = -20
         max_y = 20
 
-        inner_ellipse = Ellipse(inner_a, inner_b, theta)
-        outer_ellipse = Ellipse(outer_a, outer_b, theta)
+        nudge = Vector2d(0, 0)
+        inner_ellipse = Ellipse(inner_a, inner_b, theta, nudge)
+        outer_ellipse = Ellipse(outer_a, outer_b, theta, nudge)
 
         inner_set = set()
         for x in range(min_x, max_x + 1, 1):
-            y_pair = inner_ellipse.solve_y(x)
-            if y_pair:
+            det = inner_ellipse.y_determinant(x)
+            if det >= 0:
+                y_pair = inner_ellipse.solve_y(x, det)
                 inner_set.add((x, y_pair[0]))
                 inner_set.add((x, y_pair[1]))
 
         for y in range(min_y, max_y + 1, 1):
-            x_pair = inner_ellipse.solve_x(y)
-            if x_pair:
+            det = inner_ellipse.x_determinant(y)
+            if det >= 0:
+                x_pair = inner_ellipse.solve_x(y, det)
                 inner_set.add((x_pair[0], y))
                 inner_set.add((x_pair[1], y))
 
         outer_set = set()
         for x in range(min_x, max_x + 1, 1):
-            y_pair = outer_ellipse.solve_y(x)
-            if y_pair:
+            det = outer_ellipse.y_determinant(x)
+            if det >= 0:
+                y_pair = outer_ellipse.solve_y(x, det)
                 outer_set.add((x, y_pair[0]))
                 outer_set.add((x, y_pair[1]))
 
         for y in range(min_y, max_y + 1, 1):
-            x_pair = outer_ellipse.solve_x(y)
-            if x_pair:
+            det = outer_ellipse.x_determinant(y)
+            if det >= 0:
+                x_pair = outer_ellipse.solve_x(y, det)
                 outer_set.add((x_pair[0], y))
                 outer_set.add((x_pair[1], y))
 

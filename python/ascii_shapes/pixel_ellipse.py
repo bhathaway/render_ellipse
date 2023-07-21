@@ -1,19 +1,18 @@
 from math import *
 from .convex_polygon import *
+P = Point2d
 
 class Pixel:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        v = [(x, y), (x+1., y), (x+1., y+1.), (x, y+1.)]
+        v = [P(x, y), P(x+1., y), P(x+1., y+1.), P(x, y+1.)]
         self.poly = ConvexPolygon(v)
 
     def trim_outer(self, p0, p1, reverse=False):
-        assert(type(p0) == tuple)
-        assert(len(p0) >= 2)
-        assert(type(p1) == tuple)
-        assert(len(p1) >= 2)
-        tri = ConvexPolygon([(0., 0.), p0, p1])
+        assert(type(p0) == Point2d)
+        assert(type(p1) == Point2d)
+        tri = ConvexPolygon([P(0.0, 0.0), p0, p1])
         # Ignore double solutions. We can only get away with
         # this because we're using unit thickness ellipses.
         eps = 0.00001
@@ -40,7 +39,8 @@ class Pixel:
         self.trim_outer(p0, p1, True)
 
 class Ellipse(object):
-    def __init__(self, a, b, th, nudge=(0., 0.)):
+    def __init__(self, a, b, th, nudge):
+        assert(type(nudge) == Vector2d)
         self.a = float(a)
         self.b = float(b)
         self.th = float(th)
@@ -51,125 +51,144 @@ class Ellipse(object):
         self.B = 2*c*s*(1.0/(a*a) - 1.0/(b*b))
         self.C = (s*s)/(a*a) + (c*c)/(b*b)
 
-    def solve_y(self, x):
+    def y_determinant(self, x):
         A = self.A
         B = self.B
         C = self.C
-        x0 = self.nudge[0]
-        y0 = self.nudge[1]
-        u = x - x0
-        det = -4*A*C*u*u + B*B*u*u + 4*C
-        if det >= 0:
-            r = sqrt(det)
-            return ((r-B*u)/(2*C)+y0, (-r-B*u)/(2*C)+y0)
-        else:
-            return None
+        u = x - self.nudge.x
+        return -4*A*C*u*u + B*B*u*u + 4*C
 
-    def solve_x(self, y):
+    # Get y determinant above. If non-negative, you may use it
+    # here to solve:
+    # Returns a pair of y intercepts for an x value.
+    def solve_y(self, x, det):
+        assert(det >= 0)
+        r = sqrt(det)
+        B = self.B
+        C = self.C
+        u = x - self.nudge.x
+        y0 = self.nudge.y
+        return ((r-B*u)/(2*C)+y0, (-r-B*u)/(2*C)+y0)
+
+    def x_determinant(self, y):
         A = self.A
         B = self.B
         C = self.C
-        x0 = self.nudge[0]
-        y0 = self.nudge[1]
-        v = y - y0
-        det = -4*A*C*v*v + B*B*v*v + 4*A
+        v = y - self.nudge.y
+        return  -4*A*C*v*v + B*B*v*v + 4*A
+
+    # Get x determinant above. If non-negative, you may use it
+    # here to solve.
+    # Returns a pair of x intercepts for a y value.
+    def solve_x(self, y, det):
+        assert(det >= 0)
+        r = sqrt(det)
+        A = self.A
+        B = self.B
+        v = y - self.nudge.y
+        x0 = self.nudge.x
+        return ((r-B*v)/(2*A)+x0, (-r-B*v)/(2*A)+x0)
+
+    def points_on_grid(self):
+        p = []
+        x = 0.0
+        seeking = True
+        while seeking:
+            det = self.y_determinant(x)
+            if det >= 0:
+                y_pair = self.solve_y(x, det)
+                p.append(Point2d(x, y_pair[0]))
+                p.append(Point2d(x, y_pair[1]))
+            else:
+                seeking = False
+            x += 1.0
+
+        seeking = True
+        x = -1.0
+        while seeking:
+            det = self.y_determinant(x)
+            if det >= 0:
+                y_pair = self.solve_y(x, det)
+                p.append(Point2d(x, y_pair[0]))
+                p.append(Point2d(x, y_pair[1]))
+            else:
+                seeking = False
+            x -= 1.0
+
+        seeking = True
+        y = 0.0
+        while seeking:
+            det = self.x_determinant(y)
+            if det >= 0:
+                x_pair = self.solve_x(y, det)
+                p.append(Point2d(x_pair[0], y))
+                p.append(Point2d(x_pair[1], y))
+            else:
+                seeking = False
+            y += 1.0
+
+        seeking = True
+        y = -1.0
+        while seeking:
+            det = self.x_determinant(y)
+            if det >= 0:
+                x_pair = self.solve_x(y, det)
+                p.append(Point2d(x_pair[0], y))
+                p.append(Point2d(x_pair[1], y))
+            else:
+                seeking = False
+            y -= 1.0
+
+        return p
+
+    def points_in_pixel(self, p):
+        assert(type(p) == Pixel)
+        x = p.x
+        y = p.y
+        eps = 0.00001
+        result = set()
+
+        # Lower edge
+        det = self.x_determinant(y)
         if det >= 0:
-            r = sqrt(det)
-            return ((r-B*v)/(2*A)+x0, (-r-B*v)/(2*A)+x0)
-        else:
-            return None
-
-def ellipse_points(e):
-    assert(type(e) == Ellipse)
-    p = []
-    x = 0.
-    seeking = True
-    while seeking:
-        y_pair = e.solve_y(x)
-        if y_pair:
-            p.append((x, y_pair[0]))
-            p.append((x, y_pair[1]))
-        else:
-            seeking = False
-        x += 1.
-
-    seeking = True
-    x = -1.
-    while seeking:
-        y_pair = e.solve_y(x)
-        if y_pair:
-            p.append((x, y_pair[0]))
-            p.append((x, y_pair[1]))
-        else:
-            seeking = False
-        x -= 1.
-
-    seeking = True
-    y = 0.
-    while seeking:
-        x_pair = e.solve_x(y)
-        if x_pair:
-            p.append((x_pair[0], y))
-            p.append((x_pair[1], y))
-        else:
-            seeking = False
-        y += 1.
-
-    seeking = True
-    y = -1.
-    while seeking:
-        x_pair = e.solve_x(y)
-        if x_pair:
-            p.append((x_pair[0], y))
-            p.append((x_pair[1], y))
-        else:
-            seeking = False
-        y -= 1.
-
-    return p
-
-def points_in_pixel(el, x, y):
-    assert(type(el) == Ellipse)
-    eps = 0.00001
-    result = set()
-
-    # Lower edge
-    x_pair = el.solve_x(y)
-    if x_pair:
-        (x0, x1) = x_pair
-        if abs(x0 - x1) > eps:
-            if x0 >= x and x0 <= x+1:
-                result.add((x0, y))
-            if x1 >= x and x1 <= x+1:
-                result.add((x1, y))
-    # Right edge
-    y_pair = el.solve_y(x+1.)
-    if y_pair:
-        (y0, y1) = y_pair
-        if abs(y0 - y1) > eps:
-            if y0 >= y and y0 <= y+1:
-                result.add((x+1., y0))
-            if y1 >= y and y1 <= y+1:
-                result.add((x+1., y1))
-    # Upper edge
-    x_pair = el.solve_x(y+1.)
-    if x_pair:
-        (x0, x1) = x_pair
-        if abs(x0 - x1) > eps:
-            if x0 >= x and x0 <= x+1:
-                result.add((x0, y+1.))
-            if x1 >= x and x1 <= x+1:
-                result.add((x1, y+1.))
-    # Left edge
-    y_pair = el.solve_y(x)
-    if y_pair:
-        (y0, y1) = y_pair
-        if abs(y0 - y1) > eps:
-            if y0 >= y and y0 <= y+1:
-                result.add((x, y0))
-            if y1 >= y and y1 <= y+1:
-                result.add((x, y1))
-    return result
+            x_pair = self.solve_x(y, det)
+            (x0, x1) = x_pair
+            if abs(x0 - x1) > eps:
+                if x0 >= x and x0 <= x+1:
+                    result.add(P(x0, y))
+                if x1 >= x and x1 <= x+1:
+                    result.add(P(x1, y))
+        # Right edge
+        det = self.y_determinant(x + 1.0)
+        if det >= 0:
+            y_pair = self.solve_y(x + 1.0, det)
+            (y0, y1) = y_pair
+            if abs(y0 - y1) > eps:
+                if y0 >= y and y0 <= y+1:
+                    result.add(P(x+1., y0))
+                if y1 >= y and y1 <= y+1:
+                    result.add(P(x+1., y1))
+        # Upper edge
+        det = self.x_determinant(y + 1.0)
+        if det >= 0:
+            x_pair = self.solve_x(y + 1.0, det)
+            (x0, x1) = x_pair
+            if abs(x0 - x1) > eps:
+                if x0 >= x and x0 <= x+1:
+                    result.add(P(x0, y+1.))
+                if x1 >= x and x1 <= x+1:
+                    result.add(P(x1, y+1.))
+        # Left edge
+        det = self.y_determinant(x)
+        if det >= 0:
+            y_pair = self.solve_y(x, det)
+            (y0, y1) = y_pair
+            if abs(y0 - y1) > eps:
+                if y0 >= y and y0 <= y+1:
+                    result.add(P(x, y0))
+                if y1 >= y and y1 <= y+1:
+                    result.add(P(x, y1))
+        return result
 
 def raster_ellipse(a, b, th, nudge):
     assert(a > 1. and b > 1.)
@@ -177,20 +196,18 @@ def raster_ellipse(a, b, th, nudge):
     max_x = None
     min_y = None
     max_y = None
-    eps = 0.00001
     outer = Ellipse(a, b, th, nudge)
     inner = Ellipse(a-1., b-1., th, nudge)
     
-    outer_points = ellipse_points(outer)
-    inner_points = ellipse_points(inner)
-    both = inner_points + outer_points
+    all_points = outer.points_on_grid() + inner.points_on_grid()
 
     # Now create a sparse array of pixels from the lists.
     # For now I'm going to re-solve. I know it's inefficient, so
     # that will be something to optimize.
     candidates = set()
-    for point in both:
-        (x, y) = point
+    for point in all_points:
+        x = point.x
+        y = point.y
         candidates.add((floor(x), floor(y)))
         if floor(x) == x:
             # Include both sides
@@ -220,7 +237,7 @@ def raster_ellipse(a, b, th, nudge):
         p = Pixel(x, y)
         trimmed = False
         # No double points.
-        points = points_in_pixel(outer, x, y)
+        points = outer.points_in_pixel(p)
 
         if (len(points) >= 2):
             # To be honest, it's a huge pain to account for
@@ -232,7 +249,7 @@ def raster_ellipse(a, b, th, nudge):
 
         # Repeat for inner vertices.
 
-        points = points_in_pixel(inner, x, y)
+        points = inner.points_in_pixel(p)
         if (len(points) >= 2):
             l = list(points)
             p.trim_inner(l[0], l[1])
@@ -243,7 +260,7 @@ def raster_ellipse(a, b, th, nudge):
 
     return [[(min_x, min_y), (max_x, max_y)], pixels]
 
-def render_raster(raster):
+def ascii_render(raster):
     [(min_x, min_y), (max_x, max_y)] = raster[0]
     pixels = raster[1]
     s = ''
