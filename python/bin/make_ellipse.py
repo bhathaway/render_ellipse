@@ -2,6 +2,8 @@ import math
 from ascii_shapes.pixel_ellipse import *
 from ascii_shapes.convex_polygon import Vector2d
 
+import spdlog
+
 import argparse as ap
 parser = ap.ArgumentParser(description='Make ASCII art ellipse')
 parser.add_argument('-X', '--horizontal_radius', type=float, required=True,
@@ -19,6 +21,10 @@ parser.add_argument('--test', action='store_true')
 args = parser.parse_args()
 angle = args.angle * math.pi / 180.0
 
+logger = spdlog.ConsoleLogger('console', multithreaded=True)
+logger.set_level(spdlog.LogLevel.INFO)
+register_logger(logger.get_underlying_logger())
+logger.info('Rendering ellipse...')
 if (not args.test):
     r = raster_ellipse(args.horizontal_radius, args.vertical_radius,
         angle, Vector2d(args.nudgex, args.nudgey))

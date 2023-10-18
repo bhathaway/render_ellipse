@@ -1,5 +1,8 @@
 #pragma once
 #include "convex_polygon.h"
+
+#include "spdlog/spdlog.h"
+
 #include <set>
 #include <map>
 
@@ -61,6 +64,8 @@ private:
   double memo_b_;
   double memo_c_;
   Vector2d nudge_; // Moved from origin to facilitate aliases.
+
+  static std::shared_ptr<spdlog::logger> logger;
 };
 
 struct RasterResult {

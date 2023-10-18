@@ -5,6 +5,8 @@
 #include "src/convex_polygon.h"
 #include "src/pixel_ellipse.h"
 
+#include "spdlog/spdlog.h"
+
 namespace py = pybind11;
 
 // Note: The module name _must_ match what's in the CMakeLists.txt
@@ -75,5 +77,7 @@ PYBIND11_MODULE(ascii_shapes, m) {
 
   m_pixel_ellipse.def("raster_ellipse", &raster_ellipse);
   m_pixel_ellipse.def("ascii_render", &ascii_render);
+
+  m_pixel_ellipse.def("register_logger", &spdlog::register_logger);
 }
 
