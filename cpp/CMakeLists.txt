@@ -4,5 +4,7 @@ target_include_directories(convex_polygon PUBLIC ${PROJECT_SOURCE_DIR}/extern/sp
 set_property(TARGET convex_polygon PROPERTY CXX_STANDARD 14)
 
 pybind11_add_module(ascii_shapes bindings/pybind_module.cpp)
-target_include_directories(ascii_shapes PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(ascii_shapes PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/extern/spdlog/include)
 target_link_libraries(ascii_shapes LINK_PUBLIC convex_polygon)

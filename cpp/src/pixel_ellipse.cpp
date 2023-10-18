@@ -1,6 +1,6 @@
 #include "pixel_ellipse.h"
 
-#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 #include <cmath>
 #include <cassert>
@@ -55,10 +55,18 @@ const ConvexPolygon& Pixel::poly() const
   return poly_;
 }
 
+std::shared_ptr<spdlog::logger> Ellipse::logger = nullptr;
+
 Ellipse::Ellipse(double a, double b, double th, const Vector2d& nudge)
 : nudge_(nudge)
 {
-  spdlog::info("Checking spdlog version: {}.{}.{}",
+  if (!logger) {
+    logger = spdlog::get("console");
+    if (!logger) {
+      logger = spdlog::stdout_color_mt("c++ console");
+    }
+  }
+  logger->info("Checking spdlog version: {}.{}.{}",
       SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
 
   const double c = cos(th);
