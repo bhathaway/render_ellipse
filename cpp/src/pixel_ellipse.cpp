@@ -1,4 +1,7 @@
 #include "pixel_ellipse.h"
+
+#include "spdlog/spdlog.h"
+
 #include <cmath>
 #include <cassert>
 #include <limits>
@@ -55,6 +58,9 @@ const ConvexPolygon& Pixel::poly() const
 Ellipse::Ellipse(double a, double b, double th, const Vector2d& nudge)
 : nudge_(nudge)
 {
+  spdlog::info("Checking spdlog version: {}.{}.{}",
+      SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
+
   const double c = cos(th);
   const double s = sin(th);
 
